@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SchoolSignal — Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #0f0f0f; color: #e0e0e0; padding: 40px 24px; min-height: 100vh; }
+
+  h1 { font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 48px; }
+
+  .section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #555; margin-bottom: 16px; font-weight: 600; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 48px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* Diagram containers */
+  .diagram { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 28px; }
+  .diagram h2 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .diagram .desc { font-size: 12px; color: #555; margin-bottom: 24px; }
+
+  /* Nodes */
+  .node { border-radius: 8px; padding: 10px 14px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .node .icon { font-size: 16px; flex-shrink: 0; }
+  .node-label { font-size: 11px; color: #888; display: block; font-weight: 400; }
+
+  /* Colors */
+  .node-email { background: #1a1a2e; border: 1px solid #2a2a4a; color: #8888ff; }
+  .node-script { background: #1a2a1a; border: 1px solid #2a4a2a; color: #88cc88; }
+  .node-ai { background: #2a1a1a; border: 1px solid #4a2a2a; color: #cc8888; }
+  .node-output { background: #2a2a1a; border: 1px solid #4a4a2a; color: #cccc88; }
+  .node-mac { background: #1a1a1a; border: 1px solid #333; color: #888; }
+
+  .node-cloud { background: #1a2a2a; border: 1px solid #2a4a4a; color: #88cccc; }
+  .node-db { background: #2a1a2a; border: 1px solid #4a2a4a; color: #cc88cc; }
+  .node-app { background: #1e2a1a; border: 1px solid #3a4a2a; color: #aaccaa; }
+  .node-notify { background: #2a1e1a; border: 1px solid #4a3a2a; color: #ccaa88; }
+
+  /* Arrow */
+  .arrow { display: flex; align-items: center; justify-content: center; color: #333; font-size: 18px; margin: 2px 0; }
+  .arrow-label { font-size: 10px; color: #444; text-align: center; margin-top: -4px; margin-bottom: 4px; }
+
+  /* Comparison badges */
+  .badge-current { background: #1a2a1a; border: 1px solid #2a4a2a; color: #88cc88; font-size: 10px; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 12px; }
+  .badge-new { background: #1a1a2e; border: 1px solid #2a2a5a; color: #8888ff; font-size: 10px; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 12px; }
+
+  /* Limitations / highlights */
+  .notes { margin-top: 20px; padding-top: 16px; border-top: 1px solid #222; }
+  .note-item { display: flex; gap: 8px; font-size: 11px; color: #666; margin-bottom: 6px; }
+  .note-item .dot { flex-shrink: 0; margin-top: 3px; }
+  .note-item.pro .dot { color: #88cc88; }
+  .note-item.con .dot { color: #cc6666; }
+  .note-item.neutral .dot { color: #888; }
+
+  /* Scale section */
+  .scale-section { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 28px; margin-bottom: 32px; }
+  .scale-section h2 { font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+
+  .scale-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+  .scale-item { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; text-align: center; }
+  .scale-item .number { font-size: 28px; font-weight: 700; color: #8888ff; display: block; }
+  .scale-item .unit { font-size: 11px; color: #555; display: block; margin-top: 2px; }
+
+  /* CTA */
+  .cta { background: #161616; border: 1px solid #8888ff33; border-radius: 12px; padding: 24px 28px; text-align: center; }
+  .cta h3 { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .cta p { font-size: 12px; color: #666; margin-bottom: 16px; }
+  .cta a { background: #8888ff; color: #fff; text-decoration: none; padding: 10px 24px; border-radius: 6px; font-size: 13px; font-weight: 500; display: inline-block; }
+
+  .divider { border: none; border-top: 1px solid #1e1e1e; margin: 32px 0; }
+
+  .flow { display: flex; flex-direction: column; }
+</style>
+</head>
+<body>
+
+<h1>SchoolSignal</h1>
+<p class="subtitle">Architecture overview — current prototype vs. production platform</p>
+
+<div class="two-col">
+
+  <!-- CURRENT SETUP -->
+  <div class="diagram">
+    <span class="badge-current">● Current — Grayson Only</span>
+    <h2>What Exists Today</h2>
+    <p class="desc">A Python script running on Doug's Mac, checking one Gmail inbox via IMAP and writing to Apple apps.</p>
+
+    <div class="flow">
+      <div class="node node-email"><span class="icon">📧</span><div><span>Gmail (Doug's inbox)</span><span class="node-label">IMAP / App password</span></div></div>
+      <div class="arrow">↓</div>
+      <div class="node node-mac"><span class="icon">💻</span><div><span>Doug's Mac Mini</span><span class="node-label">Runs 24/7, cron job</span></div></div>
+      <div class="arrow">↓</div>
+      <div class="node node-script"><span class="icon">🐍</span><div><span>gmail_checker.py</span><span class="node-label">Python script, local</span></div></div>
+      <div class="arrow">↓</div>
+      <div class="node node-ai"><span class="icon">🤖</span><div><span>Claude Haiku</span><span class="node-label">Classifies each email</span></div></div>
+      <div class="arrow">↓</div>
+      <div class="node node-output"><span class="icon">📝</span><div><span>Apple Notes + Reminders</span><span class="node-label">macOS only, one user</span></div></div>
+    </div>
+
+    <div class="notes">
+      <div class="note-item pro"><span class="dot">✓</span><span>Works perfectly for Grayson today</span></div>
+      <div class="note-item pro"><span class="dot">✓</span><span>Zero infrastructure cost</span></div>
+      <div class="note-item con"><span class="dot">✕</span><span>Only works while Mac is on + online</span></div>
+      <div class="note-item con"><span class="dot">✕</span><span>macOS only — no other parents can use it</span></div>
+      <div class="note-item con"><span class="dot">✕</span><span>No UI, no notifications, no mobile</span></div>
+      <div class="note-item con"><span class="dot">✕</span><span>Hardcoded for one inbox, one child</span></div>
+    </div>
+  </div>
+
+  <!-- NEW APP -->
+  <div class="diagram">
+    <span class="badge-new">● SchoolSignal — Production</span>
+    <h2>What We're Building</h2>
+    <p class="desc">A cloud-native web app. Any parent, any email provider, any device. Always on.</p>
+
+    <div class="flow">
+      <div class="node node-email"><span class="icon">📧</span><div><span>Gmail / Outlook / iCloud</span><span class="node-label">OAuth 2.0 — secure, no password stored</span></div></div>
+      <div class="arrow">↓</div>
+      <div class="node node-cloud"><span class="icon">⚙️</span><div><span>FastAPI Backend</span><span class="node-label">Railway — always on, scales automatically</span></div></div>
+      <div class="arrow">↓</div>
+      <div class="node node-ai"><span class="icon">🤖</span><div><span>Claude Haiku</span><span class="node-label">Classifies + extracts due dates, actions</span></div></div>
+      <div class="arrow">↓</div>
+      <div class="node node-db"><span class="icon">🗄️</span><div><span>PostgreSQL</span><span class="node-label">Signals stored per user, per child</span></div></div>
+      <div class="arrow">↓</div>
+      <div class="node node-app"><span class="icon">📱</span><div><span>React Web App (PWA)</span><span class="node-label">Works on any device, installable on phone</span></div></div>
+      <div class="arrow">↓</div>
+      <div class="node node-notify"><span class="icon">🔔</span><div><span>Push + Daily Digest</span><span class="node-label">Immediate alerts for urgent items</span></div></div>
+    </div>
+
+    <div class="notes">
+      <div class="note-item pro"><span class="dot">✓</span><span>Any parent can sign up and use it</span></div>
+      <div class="note-item pro"><span class="dot">✓</span><span>Works on any device, no Mac required</span></div>
+      <div class="note-item pro"><span class="dot">✓</span><span>Multiple children per account</span></div>
+      <div class="note-item pro"><span class="dot">✓</span><span>Push notifications for urgent items</span></div>
+      <div class="note-item pro"><span class="dot">✓</span><span>Subscription revenue model</span></div>
+      <div class="note-item neutral"><span class="dot">→</span><span>~3-4 weeks to working v1</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="scale-section">
+  <h2>What It Looks Like at Scale</h2>
+  <div class="scale-grid">
+    <div class="scale-item">
+      <span class="number">$4.99</span>
+      <span class="unit">per month / family</span>
+    </div>
+    <div class="scale-item">
+      <span class="number">1,000</span>
+      <span class="unit">users = $4,990 MRR</span>
+    </div>
+    <div class="scale-item">
+      <span class="number">10,000</span>
+      <span class="unit">users = $49,900 MRR</span>
+    </div>
+    <div class="scale-item">
+      <span class="number">~$20</span>
+      <span class="unit">infra cost per 1,000 users/month</span>
+    </div>
+    <div class="scale-item">
+      <span class="number">~$0.004</span>
+      <span class="unit">AI cost per user/month</span>
+    </div>
+    <div class="scale-item">
+      <span class="number">>90%</span>
+      <span class="unit">gross margin at scale</span>
+    </div>
+  </div>
+</div>
+
+<div class="scale-section">
+  <h2>Build Phases</h2>
+  <div class="scale-grid">
+    <div class="scale-item">
+      <span class="number" style="font-size:18px; color:#88cc88;">Phase 1</span>
+      <span class="unit" style="margin-top:8px;">Gmail OAuth · AI classification · Signal feed · Daily digest · Multi-child</span>
+    </div>
+    <div class="scale-item">
+      <span class="number" style="font-size:18px; color:#8888ff;">Phase 2</span>
+      <span class="unit" style="margin-top:8px;">Outlook + iCloud · Push notifications · Calendar integration · Shared access</span>
+    </div>
+    <div class="scale-item">
+      <span class="number" style="font-size:18px; color:#cc88cc;">Phase 3</span>
+      <span class="unit" style="margin-top:8px;">School portal · Teacher tools · WhatsApp delivery · District licensing</span>
+    </div>
+  </div>
+</div>
+
+<div class="cta">
+  <h3>Built by Doug + Hammerz</h3>
+  <p>Full product spec available — ready to start Phase 1 build.</p>
+  <a href="https://raw.githubusercontent.com/D-G-K-Eng/studio-os-mockup/main/MEL_PROJECT_HANDOFF.md" style="background:#333; margin-right:8px;">View Mel's Project</a>
+</div>
+
+</body>
+</html>

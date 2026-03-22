@@ -237,3 +237,33 @@ SchoolSignal connects to a parent's email, reads incoming school communications,
 8. Paywall + Stripe
 
 *Estimated Phase 1 build time: 3-4 weeks with focused effort.*
+
+---
+
+## Module 5 — Tutor Brief
+
+Each child can have a tutor assigned (name + email).
+
+**Tutor receives (auto-generated brief, sent before each session or on demand):**
+- Assigned homework due this week (extracted from signals)
+- Upcoming tests / quizzes (extracted from signals)
+- Any outstanding action items relevant to the child's academics
+
+**Feedback loop:**
+- Feedback box in the tutor brief (tutor writes session notes, observations, concerns)
+- Parent receives tutor feedback in their Sidekick feed as a new signal
+- Running log of tutor notes per child, visible in the app
+
+**Access model:**
+- Tutor does NOT need a Sidekick account
+- Brief delivered via email, no login required
+- Feedback submitted via a lightweight web form linked in the email
+- Parent sees all feedback in their existing signal feed
+
+**Frequency:**
+- Brief auto-sent on a configurable schedule (e.g. day before each tutoring session)
+- Parent can trigger a manual "Send brief now" at any time
+
+**Data model additions:**
+- tutors table: id, child_id, name, email, session_schedule
+- tutor_feedback table: id, child_id, tutor_id, notes, submitted_at
